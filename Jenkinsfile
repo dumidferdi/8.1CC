@@ -1,22 +1,29 @@
 pipeline {
-  agent any
-  stages {
-    stage('Checkout') {
-      steps {
-        git branch: 'main', url: 'https://github.com/dumidferdi/8.1CC.git'
-      }
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building...'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing...'
+            }
+        }
     }
-    stage('Install Dependencies') {
-      steps { bat 'npm install' }
+
+    post {
+        success {
+            mail to: 'dumiferdinands@gmail.com',
+                 subject: "SUCCESS: ${env.JOB_NAME} Build #${env.BUILD_NUMBER}",
+                 body: "Good news 🎉\n\nThe build succeeded!\nCheck details: ${env.BUILD_URL}"
+        }
+        failure {
+            mail to: 'dumiferdinands@gmail.com',
+                 subject: "FAILED: ${env.JOB_NAME} Build #${env.BUILD_NUMBER}",
+                 body: "Uh oh 🚨\n\nThe build failed!\nCheck logs: ${env.BUILD_URL}"
+        }
     }
-    stage('Run Tests') {
-      steps { bat 'npm test || exit /b 0' }
-    }
-    stage('Generate Coverage Report') {
-      steps { bat 'npm run coverage || exit /b 0' }
-    }
-    stage('NPM Audit (Security Scan)') {
-      steps { bat 'npm audit || exit /b 0' }
-    }
-  }
 }
